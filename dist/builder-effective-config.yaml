@@ -1,0 +1,11 @@
+directories:
+  output: dist
+  buildResources: build
+appId: com.tal.create-image
+productName: 渐变图片生成器
+mac:
+  target:
+    - dmg
+  category: public.app-category.graphics-design
+files: []
+electronVersion: 39.2.7
