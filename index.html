@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>渐变图片生成器</title>
+    <style>
+      *, *::before, *::after {
+        box-sizing: border-box;
+      }
+      :root {
+        --bg: #0b0c10;
+        --panel: #14161d;
+        --text: #e9eef5;
+        --muted: #aab4c0;
+        --border: rgba(255, 255, 255, 0.12);
+        --accent: #7aa2ff;
+      }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+          "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        background: radial-gradient(1200px 800px at 20% 10%, #1b2140 0%, transparent 60%),
+          radial-gradient(1000px 700px at 80% 20%, #2a1c3f 0%, transparent 55%),
+          var(--bg);
+        color: var(--text);
+      }
+      header {
+        padding: 18px 20px;
+        border-bottom: 1px solid var(--border);
+        backdrop-filter: blur(10px);
+      }
+      header h1 {
+        margin: 0;
+        font-size: 16px;
+        letter-spacing: 0.2px;
+      }
+      .container {
+        display: grid;
+        grid-template-columns: 360px 1fr;
+        gap: 16px;
+        padding: 16px;
+      }
+      .panel {
+        background: color-mix(in oklab, var(--panel) 85%, black 15%);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 90px minmax(0, 1fr);
+        align-items: center;
+        gap: 10px;
+        margin: 10px 0;
+      }
+      label {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      input, select {
+        width: 100%;
+        min-width: 0;
+        padding: 10px 10px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+        outline: none;
+      }
+      input:focus, select:focus {
+        border-color: color-mix(in oklab, var(--accent) 65%, white 35%);
+      }
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 12px;
+      }
+      button {
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        cursor: pointer;
+      }
+      button.primary {
+        background: linear-gradient(135deg, rgba(122, 162, 255, 0.9), rgba(215, 137, 255, 0.85));
+        border-color: rgba(255, 255, 255, 0.22);
+        color: #0b0c10;
+        font-weight: 600;
+      }
+      button:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+      .hint {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+      .previewWrap {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        gap: 10px;
+      }
+      .previewHeader {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .previewHeader .meta {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      canvas {
+        width: 100%;
+        height: auto;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .footer {
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      @media (max-width: 980px) {
+        .container {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>渐变图片生成器（浅色）</h1>
+    </header>
+
+    <div class="container">
+      <section class="panel">
+        <div class="row">
+          <label for="width">宽度</label>
+          <input id="width" type="number" inputmode="numeric" min="16" max="8192" value="1024" />
+        </div>
+        <div class="row">
+          <label for="height">高度</label>
+          <input id="height" type="number" inputmode="numeric" min="16" max="8192" value="1024" />
+        </div>
+        <div class="row">
+          <label for="direction">方向</label>
+          <select id="direction">
+            <option value="diag" selected>对角</option>
+            <option value="horizontal">水平</option>
+            <option value="vertical">垂直</option>
+            <option value="radial">径向</option>
+          </select>
+        </div>
+
+        <div class="actions">
+          <button id="generate" class="primary">生成</button>
+          <button id="download">下载 PNG</button>
+        </div>
+
+        <div class="hint">
+          颜色会自动限定在“浅色范围”（高亮度、低饱和），避免生成太深的颜色。<br />
+          建议尺寸不要太大（例如 4096x4096 以上会变慢）。
+        </div>
+
+        <div class="footer" id="status">就绪</div>
+      </section>
+
+      <section class="panel previewWrap">
+        <div class="previewHeader">
+          <div>预览</div>
+          <div class="meta">Electron: <span id="electronVersion"></span></div>
+        </div>
+        <canvas id="canvas" width="1024" height="1024"></canvas>
+      </section>
+    </div>
+
+    <script src="renderer.js"></script>
+  </body>
+</html>
